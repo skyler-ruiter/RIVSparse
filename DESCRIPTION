@@ -1,0 +1,11 @@
+Package: RIVSparse
+Type: Package
+Title: Concise Summary of What the Package Does
+Version: 1.0
+Date: 2024-02-26
+Author: Skyler Ruiter
+Maintainer: Skyler Ruiter <ruitersk@mail.gvsu.edu>
+Description: More about what it does (maybe more than one line).
+License: Apache License 2.0
+Encoding: UTF-8
+RoxygenNote: 7.3.1
