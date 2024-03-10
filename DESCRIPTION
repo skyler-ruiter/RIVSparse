@@ -6,6 +6,6 @@ Date: 2024-02-26
 Author: Skyler Ruiter
 Maintainer: Skyler Ruiter <ruitersk@mail.gvsu.edu>
 Description: More about what it does (maybe more than one line).
-License: Apache License 2.0
+License: Apache License (== 2.0) + file LICENSE
 Encoding: UTF-8
 RoxygenNote: 7.3.1
