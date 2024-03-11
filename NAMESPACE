@@ -1,3 +1,3 @@
-## export all regularly named functions
-## (but allow for private functions whose name starts with a dot).name <- function(...)
+useDynLib(RIVSparse, .registration=TRUE)
+importFrom(Rcpp, evalCpp)
 exportPattern("^[[:alpha:]]+")

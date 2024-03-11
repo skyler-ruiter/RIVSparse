@@ -3,9 +3,16 @@ Type: Package
 Title: Concise Summary of What the Package Does
 Version: 1.0
 Date: 2024-02-26
+Author@R: person("Skyler", "Ruiter", email="ruitersk@mail.gvsu.edu", role = c("aut", "cre"), comment = c(ORCID = "0009-0008-5978-9866"))
 Author: Skyler Ruiter
 Maintainer: Skyler Ruiter <ruitersk@mail.gvsu.edu>
 Description: More about what it does (maybe more than one line).
-License: Apache License (== 2.0) + file LICENSE
+License: Apache License (== 2.0) | file LICENSE
+LazyLoad: yes
+Depends: R (>= 3.6.0)
+Imports: Rcpp (>= 1.0.12)
+LinkingTo: Rcpp
+URL: https://github.com/skyler-ruiter/RIVSparse
+BugReports: https://github.com/skyler-ruiter/RIVSparse/issues
 Encoding: UTF-8
 RoxygenNote: 7.3.1
