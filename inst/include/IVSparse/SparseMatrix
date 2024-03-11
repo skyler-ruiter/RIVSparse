@@ -33,7 +33,7 @@
 #endif
 
 // Library Includes
-#include <Eigen/Sparse>
+#include "../Eigen/Sparse"
 #include <iostream>
 #include <vector>
 #include <map>

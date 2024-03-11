@@ -1,3 +1,3 @@
 #include <Rcpp.h>
-#include <IVSparse/SparseMatrix>
+#include "IVSparse/SparseMatrix"
 

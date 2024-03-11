@@ -1,4 +1,4 @@
-#include <../inst/include/RIVSparse.h>
+#include "../inst/include/RIVSparse.h"
 
 using namespace Rcpp;
 
