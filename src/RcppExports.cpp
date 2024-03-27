@@ -31,22 +31,13 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// create_vcsc
-Rcpp::XPtr<IVSparse::VCSC<double, int>> create_vcsc(S4 mat);
-RcppExport SEXP _RIVSparse_create_vcsc(SEXP matSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< S4 >::type mat(matSEXP);
-    rcpp_result_gen = Rcpp::wrap(create_vcsc(mat));
-    return rcpp_result_gen;
-END_RCPP
-}
+
+RcppExport SEXP _rcpp_module_boot_unif_module();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_RIVSparse_rcpp_hello_world", (DL_FUNC) &_RIVSparse_rcpp_hello_world, 0},
     {"_RIVSparse_convertSparse", (DL_FUNC) &_RIVSparse_convertSparse, 1},
-    {"_RIVSparse_create_vcsc", (DL_FUNC) &_RIVSparse_create_vcsc, 1},
+    {"_rcpp_module_boot_unif_module", (DL_FUNC) &_rcpp_module_boot_unif_module, 0},
     {NULL, NULL, 0}
 };
 

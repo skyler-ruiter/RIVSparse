@@ -1,3 +1,4 @@
 useDynLib(RIVSparse, .registration=TRUE)
 importFrom(Rcpp, evalCpp)
+importFrom(Rcpp, sourceCpp)
 exportPattern("^[[:alpha:]]+")

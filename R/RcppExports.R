@@ -9,7 +9,3 @@ convertSparse <- function(mat) {
     invisible(.Call(`_RIVSparse_convertSparse`, mat))
 }
 
-create_vcsc <- function(mat) {
-    .Call(`_RIVSparse_create_vcsc`, mat)
-}
-
