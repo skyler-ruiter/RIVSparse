@@ -2,36 +2,45 @@
 
 using namespace Rcpp;
 
-class Uniform {
- public:
-  Uniform(double min_, double max_) : min(min_), max(max_) {}
-  NumericVector draw(int n) const {
-    RNGScope scope;
-    return runif(n, min, max);
-  }
-  double min, max;
+std::string hello() {
+  return "hello";
+}
+
+void bla() {
+  Rprintf("hello\\n");
+}
+
+void bla2( int x, double y) {
+  Rprintf("hello (x = %d, y = %5.2f)\\n", x, y);
+}
+
+class World {
+  public:
+    World() : msg("hello") {}
+    void set(std::string msg) { this->msg = msg; }
+    std::string greet() { return msg; }
+
+  private:
+    std::string msg;
 };
 
-double uniformRange(Uniform* w) { return w->max - w->min; }
-
-RCPP_MODULE(unif_module) {
-  class_<Uniform>("Uniform")
-
-      .constructor<double, double>()
-
-      .field("min", &Uniform::min)
-      .field("max", &Uniform::max)
-
-      .method("draw", &Uniform::draw)
-      .method("range", &uniformRange);
+RCPP_MODULE(yada) {
+  using namespace Rcpp;
+  function("hello" , &hello);
+  function("bla" , &bla);
+  function("bla2" , &bla2);
+  class_<World>("World")
+    .constructor()
+    .method("greet", &World::greet)
+    .method("set", &World::set)
+  ;
 }
 
 
 
 
-
 // [[Rcpp::export]]
-void convertSparse(S4 mat) {
+void convertSparse(S4 &mat) {
 
   IntegerVector dims = mat.slot("Dim");
   IntegerVector i = mat.slot("i");

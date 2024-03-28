@@ -11,6 +11,16 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// convertSparse
+void convertSparse(S4& mat);
+RcppExport SEXP _RIVSparse_convertSparse(SEXP matSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< S4& >::type mat(matSEXP);
+    convertSparse(mat);
+    return R_NilValue;
+END_RCPP
+}
 // rcpp_hello_world
 List rcpp_hello_world();
 RcppExport SEXP _RIVSparse_rcpp_hello_world() {
@@ -21,23 +31,15 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// convertSparse
-void convertSparse(S4 mat);
-RcppExport SEXP _RIVSparse_convertSparse(SEXP matSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< S4 >::type mat(matSEXP);
-    convertSparse(mat);
-    return R_NilValue;
-END_RCPP
-}
 
-RcppExport SEXP _rcpp_module_boot_unif_module();
+RcppExport SEXP _rcpp_module_boot_vcsc();
+RcppExport SEXP _rcpp_module_boot_yada();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_RIVSparse_rcpp_hello_world", (DL_FUNC) &_RIVSparse_rcpp_hello_world, 0},
     {"_RIVSparse_convertSparse", (DL_FUNC) &_RIVSparse_convertSparse, 1},
-    {"_rcpp_module_boot_unif_module", (DL_FUNC) &_rcpp_module_boot_unif_module, 0},
+    {"_RIVSparse_rcpp_hello_world", (DL_FUNC) &_RIVSparse_rcpp_hello_world, 0},
+    {"_rcpp_module_boot_vcsc", (DL_FUNC) &_rcpp_module_boot_vcsc, 0},
+    {"_rcpp_module_boot_yada", (DL_FUNC) &_rcpp_module_boot_yada, 0},
     {NULL, NULL, 0}
 };
 
