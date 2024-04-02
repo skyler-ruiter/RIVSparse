@@ -10,7 +10,7 @@ Description: More about what it does (maybe more than one line).
 License: Apache License (== 2.0) | file LICENSE
 LazyLoad: yes
 Depends: R (>= 3.6.0)
-Imports: Rcpp (>= 1.0.12)
+Imports: Rcpp (>= 1.0.12), methods
 LinkingTo: Rcpp
 URL: https://github.com/skyler-ruiter/RIVSparse
 BugReports: https://github.com/skyler-ruiter/RIVSparse/issues
