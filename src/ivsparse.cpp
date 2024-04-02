@@ -27,14 +27,17 @@ class DerivedVCSC : public BaseVCSC {
     // transpose mat
     NumericMatrix mat_t = transpose(dense_mat);
 
+    std::vector<std::mutex> mutexList(mat->rows());
+
     int outerDim = mat->cols();
 
+    #pragma omp parallel for
     for (uint32_t i = 0; i < outerDim; ++i) {
       for (typename IVSparse::VCSC<T, U>::InnerIterator it(*mat, i); it; ++it) {
+        std::lock_guard<std::mutex> lock(mutexList[it.getIndex()]);
         result.column(it.getIndex()) = result.column(it.getIndex()) + (mat_t.column(i) * it.value());
       }
     }
-
     // return result transposed
     return transpose(result);
   }
@@ -46,6 +49,14 @@ class VCSC {
 
   VCSC() {
     Rcout << "VCSC() called" << std::endl;
+
+    // multithreading test to see if it works
+    // make a few threads and print their id
+    #pragma omp parallel
+    {
+      int id = omp_get_thread_num();
+      Rcout << "Hello from thread " << id << std::endl;
+    }
   }
 
   VCSC(const S4 &mat) {
@@ -81,13 +92,13 @@ class VCSC {
     // init vcsc_mat
     vcsc_mat = derived_vcsc_mat;
     
-    // print the matrix
-    for (int i = 0; i < ncol; i++) {
-      for (int j = 0; j < nrow; j++) {
-        Rcout << derived_vcsc_mat->mat->coeff(i, j) << " ";
-      }
-      Rcout << std::endl;
-    }
+    // // print the matrix
+    // for (int i = 0; i < ncol; i++) {
+    //   for (int j = 0; j < nrow; j++) {
+    //     Rcout << derived_vcsc_mat->mat->coeff(i, j) << " ";
+    //   }
+    //   Rcout << std::endl;
+    // }
   }
 
   VCSC(const S4 &mat, std::string data_type, std::string index_type) {
@@ -140,12 +151,12 @@ class VCSC {
       Rcout << "nnz_vcsc: " << nnz_vcsc << std::endl;
 
       // iterate through the vcsc matrix and print each vlaue
-      for (int i = 0; i < ncol; i++) {
-        for (int j = 0; j < nrow; j++) {
-          Rcout << derived_vcsc_mat->mat->coeff(i, j) << " ";
-        }
-        Rcout << std::endl;
-      }
+      // for (int i = 0; i < ncol; i++) {
+      //   for (int j = 0; j < nrow; j++) {
+      //     Rcout << derived_vcsc_mat->mat->coeff(i, j) << " ";
+      //   }
+      //   Rcout << std::endl;
+      // }
     } 
     // else if (data_type == "" && index_type == "") {
     //   /* code */
