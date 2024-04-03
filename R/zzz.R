@@ -16,7 +16,7 @@
     options(RIVSparse.debug = TRUE)
   }
 
-  msg <- "RIVSparse v0.1.0 using 'options(RIVSparse.threads = "
+  msg <- "RIVSparse v1.0.0 using 'options(RIVSparse.threads = "
   threads <- getOption("RIVSparse.threads")
   if (threads == 0) {
     msg <- c(msg, "0)' (all available threads)")

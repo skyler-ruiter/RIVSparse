@@ -1,0 +1,38 @@
+- Add fully featured VCSC and IVCSC implmentations
+
+
+- Constructors
+  - VCSC(R dgCmatrix) // convert from dgCmatrix (CSC)
+  - VCSC(R dgRmatrix) // convert from dgRmatrix (CSR)
+  - VCSC(R dgTmatrix) // convert from dgTmatrix (COO)
+  - VCSC()            // empty constructor
+  - VCSC(filename)    // read from file
+  - VCSC(VCSC mat)    // deep copy constructor
+  - VCSC(IVCSC mat)   // convert IVCSC to VCSC
+
+- Methods
+  Converters
+  - VCSC::toDgCmatrix() // convert to dgCmatrix
+  - VCSC::toDgRmatrix() // convert to dgRmatrix
+  - VCSC::toDgTmatrix() // convert to dgTmatrix
+  - VCSC::toIVCSC()     // convert to IVCSC
+
+  Getters
+  - VCSC::coeff(int i, int j) // get coefficient at (i, j)
+  - VCSC::row(int i)         // get row i
+  - VCSC::col(int j)         // get column j
+  - VCSC::nrow()             // get number of rows
+  - VCSC::ncol()             // get number of columns
+  - VCSC::nnz()              // get number of non-zero elements
+  - VCSC::innerDim()        // get inner dimension
+  - VCSC::outerDim()        // get outer dimension
+  - VCSC::byteSize()        // get byte size
+
+  Matrix Manipulation
+  - VCSC::transpose() // transpose matrix
+  
+
+  Misc
+  - VCSC::save(filename) // save to file
+  - VCSC::write()        // write to console
+  - VCSC::print()        // print to console
