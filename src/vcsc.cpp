@@ -2,19 +2,33 @@
 
 using namespace Rcpp;
 
-// Base class
+
+//! Base class
 class BaseVCSC {
  public:
+
+  // Constructor
   virtual ~BaseVCSC() {}
+
+  //* Virtual methods
+
+  // getters
   virtual double coeff(int i, int j) = 0;
+  virtual int rows() = 0;
+  virtual int cols() = 0;
+  
+
+  // matrix operations
   virtual NumericMatrix mult(NumericMatrix dense_mat) = 0;
 };
 
-// Templated derived class
+
+//! Templated derived class
 template <typename T, typename U>
 class DerivedVCSC : public BaseVCSC {
+ 
  public:
-  IVSparse::VCSC<T, U> *mat;
+  IVSparse::VCSC<T, U> *mat; // pointer to the VCSC matrix
 
   double coeff(int i, int j) {
     return mat->coeff(i, j);
@@ -43,7 +57,7 @@ class DerivedVCSC : public BaseVCSC {
   }
 };
 
-// Your VCSC class
+//! Your VCSC class
 class VCSC {
  public:
 

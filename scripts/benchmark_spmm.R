@@ -39,5 +39,5 @@ bench2 <- microbenchmark(
 print("Unique Sparse")
 print(bench)
 
-print("\n 50% redundant Sparse")
+print("50% redundant Sparse")
 print(bench2)

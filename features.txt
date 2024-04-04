@@ -19,8 +19,6 @@
 
   Getters
   - VCSC::coeff(int i, int j) // get coefficient at (i, j)
-  - VCSC::row(int i)         // get row i
-  - VCSC::col(int j)         // get column j
   - VCSC::nrow()             // get number of rows
   - VCSC::ncol()             // get number of columns
   - VCSC::nnz()              // get number of non-zero elements
@@ -29,10 +27,32 @@
   - VCSC::byteSize()        // get byte size
 
   Matrix Manipulation
-  - VCSC::transpose() // transpose matrix
-  
+  - VCSC::transpose()                // transpose matrix
+  - VCSC::slice(int i)              // get a row/column depending on the storage order
+  - VCSC::slice(int start, int end) // get a submatrix
+  - VCSC::append(VCSC mat)          // append a matrix
 
+  Matrix Operations
+  - VCSC::add(VCSC mat) // add two matrices
+  - VCSC::sub(VCSC mat) // subtract two matrices
+  - VCSC::scale(double s) // scale matrix  
+  - VCSC::mult(dgCMatrix mat) // SpMM / SpMV
+  - VCSC::trace() // trace of the matrix
+  - VCSC::norm()  // Frobenius norm
+  - VCSC::sum()   // sum of all elements
+  
+  Operators
+  - VCSC::operator+(VCSC mat) // add two matrices
+  - VCSC::operator-(VCSC mat) // subtract two matrices
+  - VCSC::operator*(VCSC mat) // multiply two matrices
+  - VCSC::operator*(double s) // scale matrix
+  - VCSC::operator==(VCSC mat) // check equality
+  - VCSC::operator!=(VCSC mat) // check inequality
+  - VCSC::operator=(VCSC mat)  // deep copy
+  
   Misc
   - VCSC::save(filename) // save to file
   - VCSC::write()        // write to console
   - VCSC::print()        // print to console
+
+  -------------ADD THE ITERATOR----------------
