@@ -28,7 +28,7 @@
 
   Matrix Manipulation
   - VCSC::transpose()                // transpose matrix
-  - VCSC::slice(int i)              // get a row/column depending on the storage order
+  - VCSC::slice(int i)              // get a row/column
   - VCSC::slice(int start, int end) // get a submatrix
   - VCSC::append(VCSC mat)          // append a matrix
 
@@ -56,3 +56,6 @@
   - VCSC::print()        // print to console
 
   -------------ADD THE ITERATOR----------------
+  - VCSC::iterator // iterator for the matrix
+  - VCSC::begin()   // get iterator to the beginning
+
