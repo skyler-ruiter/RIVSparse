@@ -2,7 +2,7 @@
 
 using namespace Rcpp;
 
-
+// class VCSC;
 
 //! Base class
 class BaseVCSC {
@@ -61,8 +61,8 @@ class BaseVCSC {
    *****************************************************/
   // virtual VCSC operator*(double scalar) = 0;
   // virtual VCSC operator*(NumericMatrix dense_mat) = 0;
-  // virtual bool operator==(VCSC vcsc) = 0;
-  // virtual bool operator!=(VCSC vcsc) = 0;
+  // virtual bool operator==(const VCSC& vcsc) = 0;
+  // virtual bool operator!=(const VCSC &vcsc) = 0;
   // virtual VCSC operator=(VCSC vcsc) = 0;
 
   /*****************************************************
@@ -158,8 +158,12 @@ class DerivedVCSC : public BaseVCSC {
    *****************************************************/
   // VCSC operator*(double scalar) {}
   // VCSC operator*(NumericMatrix dense_mat) {}
-  // bool operator==(VCSC vcsc) {}
-  // bool operator!=(VCSC vcsc) {}
+  // bool operator==(VCSC &vcsc) {
+  //   return mat->operator==(*vcsc.vcsc_mat->mat);
+  // }
+  // bool operator!=(VCSC &vcsc) {
+  //   return mat->operator!=(*vcsc.vcsc_mat->mat);
+  // }
   // VCSC operator=(VCSC vcsc) {}
 
   /*****************************************************
@@ -585,11 +589,15 @@ class VCSC {
   // // spmm
   // VCSC operator*(NumericMatrix dense_mat) {}
 
-  // // equality
-  // bool operator==(VCSC vcsc) {}
+  // equality
+  // bool operator==(VCSC &vcsc) {
+  //   return vcsc_mat->operator==(*vcsc.vcsc_mat);
+  // }
 
   // // inequality
-  // bool operator!=(VCSC vcsc) {}
+  // bool operator!=(VCSC &vcsc) {
+  //   return vcsc_mat->operator!=(*vcsc.vcsc_mat);
+  // }
 
   // // assignment
   // VCSC operator=(VCSC vcsc) {}
@@ -616,12 +624,6 @@ class VCSC {
  private:
   BaseVCSC *vcsc_mat;
 };
-
-
-
-
-
-
 
 
 // Expose the VCSC class

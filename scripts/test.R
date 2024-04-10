@@ -35,7 +35,10 @@ A2 <- rsparsematrix(n, n, 0.5, rand.x=function(n) rpois(n, 1) + 1)
 # vcsc_A$outerdim()
 # vcsc_A$bytesize()
 
-
+# test equality and inequality
+vcsc_A == vcsc_A
+vcsc_A == vcsc_B
+vcsc_A != vcsc_B
 
 
 
