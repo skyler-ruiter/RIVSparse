@@ -2,7 +2,7 @@
 
 using namespace Rcpp;
 
-
+class VCSC;
 
 //! Base class
 class BaseVCSC {
@@ -47,9 +47,9 @@ class BaseVCSC {
    *                                                   *
    *                                                   *
    *****************************************************/
-  // virtual VCSC transpose() = 0;
+  virtual void transpose() = 0;
   // virtual VCSC slice(int start, int end) = 0;
-  // virtual void append(VCSC vcsc) = 0;
+  virtual void append(VCSC& other) = 0;
   virtual NumericMatrix mult(NumericMatrix dense_mat) = 0;
 
   /*****************************************************
@@ -124,15 +124,21 @@ class DerivedVCSC : public BaseVCSC {
    *                                                   *
    *                                                   *
    *****************************************************/
-  // VCSC transpose() {}
+  void transpose() {
+    // transpose the matrix
+    mat->inPlaceTranspose();
+  }
+  
   // VCSC slice(int start, int end) {}
-  // void append(VCSC vcsc) {}
+
+  void append(VCSC& other) override;
+
   NumericMatrix mult(NumericMatrix dense_mat) {
     // make a new dense matrix to store the result
     NumericMatrix result(dense_mat.ncol(), dense_mat.nrow());
 
     // transpose mat
-    NumericMatrix mat_t = transpose(dense_mat);
+    NumericMatrix mat_t = Rcpp::transpose(dense_mat);
 
     std::vector<std::mutex> mutexList(mat->rows());
 
@@ -146,7 +152,7 @@ class DerivedVCSC : public BaseVCSC {
       }
     }
     // return result transposed
-    return transpose(result);
+    return Rcpp::transpose(result);
   }
 
   /*****************************************************
@@ -172,10 +178,11 @@ class DerivedVCSC : public BaseVCSC {
   // void print() {}
   // void save(std::string filename) {}
   // VCSC load(std::string filename) {}
+
+  // IVSparse::VCSC<T, U, columnMajor> *getMat() override {
+  //   return mat;
+  // }
 };
-
-
-
 
 
 
@@ -559,14 +566,14 @@ class VCSC {
    *                                                   *
    *****************************************************/
 
-  // transpose
-  // VCSC transpose() {}
+  // in place transpose
+  void transpose() { vcsc_mat->transpose();}
 
   // // slice
   // VCSC slice(int start, int end) {}
 
-  // // append
-  // void append(VCSC vcsc) {}
+  // append
+  void append(VCSC &other) { vcsc_mat->append(other); } 
 
   // matrix multiplication
   NumericMatrix mult(NumericMatrix dense_mat) { return vcsc_mat->mult(dense_mat); }
@@ -613,13 +620,24 @@ class VCSC {
 
   //------------------------------------------------------
 
- private:
+//  private:
   BaseVCSC *vcsc_mat;
 };
 
 
 
-
+// // DerivedVCSC methods that have circular dependencies
+template <typename T, typename U, bool columnMajor>
+void DerivedVCSC<T, U, columnMajor>::append(VCSC& other) {
+  IVSparse::VCSC<T, U, columnMajor> *other_mat;
+  // other_mat = other.vcsc_mat->mat;
+  
+  // get number of columns of other
+  int other_cols = other.cols();
+  
+  //print number of added columns
+  Rprintf("Adding %d columns\n", other_cols);
+}
 
 
 
@@ -647,9 +665,9 @@ RCPP_MODULE(vcsc) {
     .method("outerdim", &VCSC::outerdim)
     .method("bytesize", &VCSC::bytesize)
     // // matrix manipulation
-    // .method("transpose", &VCSC::transpose)
+    .method("transpose", &VCSC::transpose)
     // .method("slice", &VCSC::slice)
-    // .method("append", &VCSC::append)
+    .method("append", &VCSC::append)
     .method("mult", &VCSC::mult)
     // // operators
     // .method("operator*", &VCSC::operator*)

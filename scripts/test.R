@@ -18,6 +18,9 @@ vcsc_A <- VCSC$new(A)
 vcsc_B <- VCSC$new(B)
 vcsc_C <- VCSC$new(C)
 
+# transpose vcsc_A
+vcsc_A$transpose()
+
 # str(A)
 # str(B)
 # str(C)
@@ -35,19 +38,20 @@ A2 <- rsparsematrix(n, n, 0.5, rand.x=function(n) rpois(n, 1) + 1)
 # vcsc_A$outerdim()
 # vcsc_A$bytesize()
 
+vcsc_A2 <- VCSC$new(A2, "int", "int")
+vcsc_A2_copy <- new(VCSC, A2, "int", "int")
 
+vcsc_A2
 
+# make a reference to vcsc_A2
+vcsc_A2_ref <- vcsc_A2
 
+# test append
+vcsc_A2$append(vcsc_A2_copy)
 
+# vcsc_A2$append(vcsc_A2_copy)
 
-
-
-
-
-
-
-
-
+vcsc_A2
 
 
 
