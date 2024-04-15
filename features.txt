@@ -2,60 +2,60 @@
 
 
 - Constructors
-  - VCSC(R dgCmatrix) // convert from dgCmatrix (CSC)
-  - VCSC(R dgRmatrix) // convert from dgRmatrix (CSR)
-  - VCSC(R dgTmatrix) // convert from dgTmatrix (COO)
-  - VCSC()            // empty constructor
-  - VCSC(filename)    // read from file
-  - VCSC(VCSC mat)    // deep copy constructor
-  - VCSC(IVCSC mat)   // convert IVCSC to VCSC
+  [+] VCSC(R dgCmatrix) // convert from dgCmatrix (CSC)
+  [+] VCSC(R dgRmatrix) // convert from dgRmatrix (CSR)
+  [+] VCSC(R dgTmatrix) // convert from dgTmatrix (COO)
+  [-] VCSC()            // empty constructor
+  [-] VCSC(filename)    // read from file
+  [-] VCSC(VCSC mat)    // deep copy constructor
+  [-] VCSC(IVCSC mat)   // convert IVCSC to VCSC
 
 - Methods
   Converters
-  - VCSC::toDgCmatrix() // convert to dgCmatrix
-  - VCSC::toDgRmatrix() // convert to dgRmatrix
-  - VCSC::toDgTmatrix() // convert to dgTmatrix
-  - VCSC::toIVCSC()     // convert to IVCSC
+  [-] VCSC::toDgCmatrix() // convert to dgCmatrix
+  [-] VCSC::toDgRmatrix() // convert to dgRmatrix
+  [-] VCSC::toDgTmatrix() // convert to dgTmatrix
+  [-] VCSC::toIVCSC()     // convert to IVCSC
 
   Getters
-  - VCSC::coeff(int i, int j) // get coefficient at (i, j)
-  - VCSC::nrow()             // get number of rows
-  - VCSC::ncol()             // get number of columns
-  - VCSC::nnz()              // get number of non-zero elements
-  - VCSC::innerDim()        // get inner dimension
-  - VCSC::outerDim()        // get outer dimension
-  - VCSC::byteSize()        // get byte size
+  [+] VCSC::coeff(int i, int j) // get coefficient at (i, j)
+  [+] VCSC::nrow()             // get number of rows
+  [+] VCSC::ncol()             // get number of columns
+  [+] VCSC::nnz()              // get number of non-zero elements
+  [+] VCSC::innerDim()        // get inner dimension
+  [+] VCSC::outerDim()        // get outer dimension
+  [+] VCSC::byteSize()        // get byte size
 
   Matrix Manipulation
-  - VCSC::transpose()                // transpose matrix
-  - VCSC::slice(int i)              // get a row/column
-  - VCSC::slice(int start, int end) // get a submatrix
-  - VCSC::append(VCSC mat)          // append a matrix
+  [+] VCSC::transpose()                // transpose matrix
+  [-] VCSC::slice(int i)              // get a row/column
+  [-] VCSC::slice(int start, int end) // get a submatrix
+  [-] VCSC::append(VCSC mat)          // append a matrix
 
   Matrix Operations
-  - VCSC::add(VCSC mat) // add two matrices
-  - VCSC::sub(VCSC mat) // subtract two matrices
-  - VCSC::scale(double s) // scale matrix  
-  - VCSC::mult(dgCMatrix mat) // SpMM / SpMV
-  - VCSC::trace() // trace of the matrix
-  - VCSC::norm()  // Frobenius norm
-  - VCSC::sum()   // sum of all elements
+  [-] VCSC::add(VCSC mat) // add two matrices
+  [-] VCSC::sub(VCSC mat) // subtract two matrices
+  [-] VCSC::scale(double s) // scale matrix  
+  [-] VCSC::mult(dgCMatrix mat) // SpMM / SpMV
+  [-] VCSC::trace() // trace of the matrix
+  [-] VCSC::norm()  // Frobenius norm
+  [-] VCSC::sum()   // sum of all elements
   
   Operators
-  - VCSC::operator+(VCSC mat) // add two matrices
-  - VCSC::operator-(VCSC mat) // subtract two matrices
-  - VCSC::operator*(VCSC mat) // multiply two matrices
-  - VCSC::operator*(double s) // scale matrix
-  - VCSC::operator==(VCSC mat) // check equality
-  - VCSC::operator!=(VCSC mat) // check inequality
-  - VCSC::operator=(VCSC mat)  // deep copy
+  [-] VCSC::operator+(VCSC mat) // add two matrices
+  [-] VCSC::operator-(VCSC mat) // subtract two matrices
+  [-] VCSC::operator*(VCSC mat) // multiply two matrices
+  [-] VCSC::operator*(double s) // scale matrix
+  [-] VCSC::operator==(VCSC mat) // check equality
+  [-] VCSC::operator!=(VCSC mat) // check inequality
+  [-] VCSC::operator=(VCSC mat)  // deep copy
   
   Misc
-  - VCSC::save(filename) // save to file
-  - VCSC::write()        // write to console
-  - VCSC::print()        // print to console
+  [-] VCSC::save(filename) // save to file
+  [-] VCSC::write()        // write to console
+  [+] VCSC::print()        // print to console
 
   -------------ADD THE ITERATOR----------------
-  - VCSC::iterator // iterator for the matrix
-  - VCSC::begin()   // get iterator to the beginning
+  [-] VCSC::iterator // iterator for the matrix
+  [-] VCSC::begin()   // get iterator to the beginning
 

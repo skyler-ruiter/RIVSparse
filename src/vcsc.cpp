@@ -72,7 +72,6 @@ class BaseVCSC {
    *                                                   *
    *                                                   *
    *****************************************************/
-  // virtual void print() = 0;
   // virtual void save(std::string filename) = 0;
   // virtual VCSC load(std::string filename) = 0;
 };
@@ -162,7 +161,10 @@ class DerivedVCSC : public BaseVCSC {
    *                                                   *
    *                                                   *
    *****************************************************/
-  // VCSC operator*(double scalar) {}
+  // VCSC operator*(double scalar) {
+    
+  // }
+
   // VCSC operator*(NumericMatrix dense_mat) {}
   // bool operator==(VCSC &vcsc) {
   //   return mat->operator==(*vcsc.vcsc_mat->mat);
@@ -179,13 +181,8 @@ class DerivedVCSC : public BaseVCSC {
    *                                                   *
    *                                                   *
    *****************************************************/
-  // void print() {}
   // void save(std::string filename) {}
   // VCSC load(std::string filename) {}
-
-  // IVSparse::VCSC<T, U, columnMajor> *getMat() override {
-  //   return mat;
-  // }
 };
 
 
@@ -194,6 +191,8 @@ class DerivedVCSC : public BaseVCSC {
 //! Your VCSC class
 class VCSC {
  public:
+  // Pointer to the VCSC matrix
+  BaseVCSC *vcsc_mat;
 
  /****************************************************
  *                                                   *
@@ -591,7 +590,7 @@ class VCSC {
    *****************************************************/
 
   // scale
-  // VCSC operator*(double scalar) {}
+  // VCSC operator*(double scalar) { return vcsc_mat->operator*(scalar); }
 
   // // spmm
   // VCSC operator*(NumericMatrix dense_mat) {}
@@ -618,7 +617,25 @@ class VCSC {
    *****************************************************/
 
   // print
-  // void print() {}
+  void print() {
+    if (vcsc_mat->rows() < 100 && vcsc_mat->cols() < 100) {
+      for (int i = 0; i < vcsc_mat->rows(); i++) {
+        for (int j = 0; j < vcsc_mat->cols(); j++) {
+          Rprintf("%f ", vcsc_mat->coeff(i, j));
+        }
+        Rprintf("\n");
+      }
+    } else {
+      // print summary and first 10 rows and columns
+      Rprintf("Rows: %d, Cols: %d, NNZ: %d\n", vcsc_mat->rows(), vcsc_mat->cols(), vcsc_mat->nnz());
+      for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+          Rprintf("%f ", vcsc_mat->coeff(i, j));
+        }
+        Rprintf("\n");
+      }
+    }
+  }
 
   // // save
   // void save(std::string filename) {}
@@ -628,13 +645,11 @@ class VCSC {
 
   //------------------------------------------------------
 
-//  private:
-  BaseVCSC *vcsc_mat;
 };
 
 
 
-// // DerivedVCSC methods that have circular dependencies
+// DerivedVCSC methods that have circular dependencies
 template <typename T, typename U, bool columnMajor>
 void DerivedVCSC<T, U, columnMajor>::append(VCSC& other) {
   IVSparse::VCSC<T, U, columnMajor> *other_mat;
@@ -660,11 +675,11 @@ RCPP_MODULE(vcsc) {
     // .constructor<VCSC>()
     // // .constructor<IVCSC>()
     // // Add methods here
-    // // converter methods
+    // converter methods
     // .method("to_dgCMatrix", &VCSC::to_dgCMatrix)
     // .method("to_dgRMatrix", &VCSC::to_dgRMatrix)
     // .method("to_dgTMatrix", &VCSC::to_dgTMatrix)
-    // // getters
+    // getters
     .method("coeff", &VCSC::coeff)
     .method("rows", &VCSC::rows)
     .method("cols", &VCSC::cols)
@@ -672,19 +687,19 @@ RCPP_MODULE(vcsc) {
     .method("innerdim", &VCSC::innerdim)
     .method("outerdim", &VCSC::outerdim)
     .method("bytesize", &VCSC::bytesize)
-    // // matrix manipulation
+    // matrix manipulation
     .method("transpose", &VCSC::transpose)
     // .method("slice", &VCSC::slice)
     .method("append", &VCSC::append)
     .method("mult", &VCSC::mult)
-    // // operators
+    // operators
     // .method("operator*", &VCSC::operator*)
     // .method("operator*", &VCSC::operator*)
     // .method("operator==", &VCSC::operator==)
     // .method("operator!=", &VCSC::operator!=)
     // .method("operator=", &VCSC::operator=)
-    // // misc
-    // .method("print", &VCSC::print)
+    // misc
+    .method("print", &VCSC::print)
     // .method("save", &VCSC::save)
     // .method("load", &VCSC::load)
     ;

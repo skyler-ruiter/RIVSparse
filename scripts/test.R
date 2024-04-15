@@ -47,12 +47,19 @@ vcsc_A2
 vcsc_A2_ref <- vcsc_A2
 
 # test append
-vcsc_A2$append(vcsc_A2_copy)
-
 # vcsc_A2$append(vcsc_A2_copy)
+
 
 vcsc_A2
 
+# make a 1000x1000 matrix
+# n <- 1000
+# A2 <- rsparsematrix(n, n, 0.5, rand.x=function(n) rpois(n, 1) + 1)
+# temp <- VCSC$new(A2, "int", "int")
+# temp
+
+print("Testing .print()")
+vcsc_A2$print()
 
 
 # A
