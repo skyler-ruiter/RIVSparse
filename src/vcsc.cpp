@@ -2,6 +2,9 @@
 
 using namespace Rcpp;
 
+// class BaseVCSC;
+// template <typename T, typename U, bool columnMajor>
+// class DerivedVCSC;
 class VCSC;
 
 //! Base class
