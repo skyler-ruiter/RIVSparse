@@ -12,10 +12,16 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 
-RcppExport SEXP _rcpp_module_boot_vcsc();
+RcppExport SEXP _rcpp_module_boot_vcsc_int_int();
+RcppExport SEXP _rcpp_module_boot_vcsc_int_uint64();
+RcppExport SEXP _rcpp_module_boot_vcsc_double_int();
+RcppExport SEXP _rcpp_module_boot_vcsc_double_uint64();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_rcpp_module_boot_vcsc", (DL_FUNC) &_rcpp_module_boot_vcsc, 0},
+    {"_rcpp_module_boot_vcsc_int_int", (DL_FUNC) &_rcpp_module_boot_vcsc_int_int, 0},
+    {"_rcpp_module_boot_vcsc_int_uint64", (DL_FUNC) &_rcpp_module_boot_vcsc_int_uint64, 0},
+    {"_rcpp_module_boot_vcsc_double_int", (DL_FUNC) &_rcpp_module_boot_vcsc_double_int, 0},
+    {"_rcpp_module_boot_vcsc_double_uint64", (DL_FUNC) &_rcpp_module_boot_vcsc_double_uint64, 0},
     {NULL, NULL, 0}
 };
 

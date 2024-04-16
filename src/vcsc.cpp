@@ -2,220 +2,24 @@
 
 using namespace Rcpp;
 
-// class BaseVCSC;
-// template <typename T, typename U, bool columnMajor>
-// class DerivedVCSC;
-class VCSC;
+namespace RIVSparse {
 
-//! Base class
-class BaseVCSC {
- public:
-
-  // Constructor
-  virtual ~BaseVCSC() {}
-
-  //* Virtual methods
-  /****************************************************
-   *                                                   *
-   *                                                   *
-   *                   Converters                      *
-   *                                                   *
-   *                                                   *
-   *****************************************************/
-  // virtual S4 to_dgCMatrix() = 0;
-  // virtual S4 to_dgRMatrix() = 0;
-  // virtual S4 to_dgTMatrix() = 0;
-  // virtual IVCSC to_ivcsc() = 0;
-
-  /****************************************************
-   *                                                   *
-   *                                                   *
-   *                      Getters                      *
-   *                                                   *
-   *                                                   *
-   *****************************************************/
-  virtual double coeff(int i, int j) = 0;
-  virtual int rows() = 0;
-  virtual int cols() = 0;
-  virtual int nnz() = 0;
-  virtual int innerdim() = 0;
-  virtual int outerdim() = 0;
-  virtual int bytesize() = 0;
-
-
-  /****************************************************
-   *                                                   *
-   *                                                   *
-   *               Matrix Manipulation                 *
-   *                                                   *
-   *                                                   *
-   *****************************************************/
-  virtual void transpose() = 0;
-  // virtual VCSC slice(int start, int end) = 0;
-  virtual void append(VCSC& other) = 0;
-  virtual NumericMatrix mult(NumericMatrix dense_mat) = 0;
-
-  /*****************************************************
-   *                                                   *
-   *                                                   *
-   *                     Operators                     *
-   *                                                   *
-   *                                                   *
-   *****************************************************/
-  // virtual VCSC operator*(double scalar) = 0;
-  // virtual VCSC operator*(NumericMatrix dense_mat) = 0;
-  // virtual bool operator==(const VCSC& vcsc) = 0;
-  // virtual bool operator!=(const VCSC &vcsc) = 0;
-  // virtual VCSC operator=(VCSC vcsc) = 0;
-
-  /*****************************************************
-   *                                                   *
-   *                                                   *
-   *                       Misc                        *
-   *                                                   *
-   *                                                   *
-   *****************************************************/
-  // virtual void save(std::string filename) = 0;
-  // virtual VCSC load(std::string filename) = 0;
-};
-
-
-
-
-
-
-//! Templated derived class
-template <typename T, typename U, bool columnMajor = 1>
-class DerivedVCSC : public BaseVCSC {
- 
- public:
-  // Underlying VCSC matrix
-  IVSparse::VCSC<T, U, columnMajor> *mat; // pointer to the VCSC matrix
-
-  /****************************************************
-   *                                                   *
-   *                                                   *
-   *                   Converters                      *
-   *                                                   *
-   *                                                   *
-   *****************************************************/
-  // S4 to_dgCMatrix() {}
-  // S4 to_dgRMatrix() {}
-  // S4 to_dgTMatrix() {}
-  // IVCSC to_ivcsc() {}
-
-  /******************************************************
-   *                                                    *
-   *                                                    *
-   *                      Getters                       *
-   *                                                    *
-   *                                                    *
-   *****************************************************/
-  double coeff(int i, int j) { return mat->coeff(i, j); }
-  int rows() { return mat->rows(); }
-  int cols() { return mat->cols(); }
-  int nnz() { return mat->nonZeros(); }
-  int innerdim() { return mat->innerSize(); }
-  int outerdim() { return mat->outerSize(); }
-  int bytesize() { return mat->byteSize(); }
-
-  /****************************************************
-   *                                                   *
-   *                                                   *
-   *               Matrix Manipulation                 *
-   *                                                   *
-   *                                                   *
-   *****************************************************/
-  void transpose() {
-    // transpose the matrix
-    mat->inPlaceTranspose();
-  }
-  
-  // VCSC slice(int start, int end) {}
-
-  void append(VCSC& other) override;
-
-  NumericMatrix mult(NumericMatrix dense_mat) {
-    // make a new dense matrix to store the result
-    NumericMatrix result(dense_mat.ncol(), dense_mat.nrow());
-
-    // transpose mat
-    NumericMatrix mat_t = Rcpp::transpose(dense_mat);
-
-    std::vector<std::mutex> mutexList(mat->rows());
-
-    int outerDim = mat->cols();
-
-    #pragma omp parallel for
-    for (uint32_t i = 0; i < outerDim; ++i) {
-      for (typename IVSparse::VCSC<T, U, columnMajor>::InnerIterator it(*mat, i); it; ++it) {
-        std::lock_guard<std::mutex> lock(mutexList[it.getIndex()]);
-        result.column(it.getIndex()) = result.column(it.getIndex()) + (mat_t.column(i) * it.value());
-      }
-    }
-    // return result transposed
-    return Rcpp::transpose(result);
-  }
-
-  /*****************************************************
-   *                                                   *
-   *                                                   *
-   *                     Operators                     *
-   *                                                   *
-   *                                                   *
-   *****************************************************/
-  // VCSC operator*(double scalar) {
-    
-  // }
-
-  // VCSC operator*(NumericMatrix dense_mat) {}
-  // bool operator==(VCSC &vcsc) {
-  //   return mat->operator==(*vcsc.vcsc_mat->mat);
-  // }
-  // bool operator!=(VCSC &vcsc) {
-  //   return mat->operator!=(*vcsc.vcsc_mat->mat);
-  // }
-  // VCSC operator=(VCSC vcsc) {}
-
-  /*****************************************************
-   *                                                   *
-   *                                                   *
-   *                       Misc                        *
-   *                                                   *
-   *                                                   *
-   *****************************************************/
-  // void save(std::string filename) {}
-  // VCSC load(std::string filename) {}
-};
-
-
-
-
-//! Your VCSC class
+template <typename T, typename U>
 class VCSC {
- public:
-  // Pointer to the VCSC matrix
-  BaseVCSC *vcsc_mat;
+  public:
+  IVSparse::VCSC<T, U> *vcsc;
+  bool columnMajor = true;
 
- /****************************************************
- *                                                   *
- *                                                   *
- *                   Constructors                    *
- *                                                   *
- *                                                   *
- *****************************************************/
-
-  // Default constructor
   VCSC() {}
 
-  //! dgTMatrix->VCSC conversion is not great, needs to copy because not sorted COO
-  // Constructor to convert a dg(C/R/T)Matrix to VCSC
-  VCSC(const S4 &mat) {  // take a dg(C/R/T)Matrix and convert it to VCSC<int, double>
-    // create the vectors
+  VCSC(IVSparse::VCSC<T, U> *vcsc) {
+    this->vcsc = vcsc;
+  }
+
+  VCSC(const S4 &mat) {
     IntegerVector i, p, Dim;
     NumericVector x;
     List Dimnames;
-    bool columnMajor = true;
 
     // get sparse matrix type
     std::string mat_type = mat.attr("class");
@@ -249,461 +53,149 @@ class VCSC {
     int *p_ptr = &p[0];
     double *x_ptr = &x[0];
 
-    if (mat_type == "dgTMatrix") {
-      DerivedVCSC<double, int> *derived_vcsc_mat = new DerivedVCSC<double, int>();
-      // construct a vector of tuples to store the triplet matrix
-      std::vector<std::tuple<int, int, double>> entries;
+    // make new poitners of type <T, U>
+    U *i_ptr_new;
+    U *p_ptr_new;
+    T *x_ptr_new;
+
+    // if type of <T, U> is the same as the original type, just use the original pointers
+    if (std::is_same<T, double>::value && std::is_same<U, int>::value) {
+      i_ptr_new = (U *) i_ptr;
+      p_ptr_new = (U *) p_ptr;
+      x_ptr_new = (T *) x_ptr;
+    } else {
+            // convert the pointers to the new type
+      i_ptr_new = new U[nnz];
+      p_ptr_new = new U[ncol + 1];
+      x_ptr_new = new T[nnz];
+
       for (int k = 0; k < nnz; k++) {
-        entries.push_back(std::make_tuple(i_ptr[k], p_ptr[k], x_ptr[k]));
+        i_ptr_new[k] = i_ptr[k];
+        x_ptr_new[k] = x_ptr[k];
+      }
+
+      for (int k = 0; k < ncol + 1; k++) {
+        p_ptr_new[k] = p_ptr[k];
+      }
+    }
+
+    if (mat_type == "dgTMatrix") {
+      // construct a vector of tuples to store the triplet matrix
+      std::vector<std::tuple<U, U, T>> entries;
+      for (int k = 0; k < nnz; k++) {
+        entries.push_back(std::make_tuple(i_ptr_new[k], p_ptr_new[k], x_ptr_new[k]));
       }
 
       // sort the entries by column
-      std::sort(entries.begin(), entries.end(), [](const std::tuple<int, int, double> &a, const std::tuple<int, int, double> &b) {
+      std::sort(entries.begin(), entries.end(), [](const std::tuple<U, U, T> &a, const std::tuple<U, U, T> &b) {
         return std::get<1>(a) < std::get<1>(b);
       });
 
-      derived_vcsc_mat->mat = new IVSparse::VCSC<double, int>(entries, nrow, ncol, nnz);
-      vcsc_mat = derived_vcsc_mat;
-
+      vcsc = new IVSparse::VCSC<T, U>(entries, nrow, ncol, nnz);
       return;
     }
 
-    if (columnMajor) {
-      DerivedVCSC<double, int> *derived_vcsc_mat = new DerivedVCSC<double, int>();
-      derived_vcsc_mat->mat = new IVSparse::VCSC<double, int>(x_ptr, i_ptr, p_ptr, nrow, ncol, nnz);
-      vcsc_mat = derived_vcsc_mat;
-    } else {
-      DerivedVCSC<double, int, 0> *derived_vcsc_mat = new DerivedVCSC<double, int, 0>();
-      derived_vcsc_mat->mat = new IVSparse::VCSC<double, int, 0>(x_ptr, i_ptr, p_ptr, nrow, ncol, nnz);
-      vcsc_mat = derived_vcsc_mat;
-    }
+    vcsc = new IVSparse::VCSC<T, U>(x_ptr_new, i_ptr_new, p_ptr_new, nrow, ncol, nnz);
+
   }
 
-  // Constructor to convert a dgCMatrix to VCSC with specified data and index types
-  VCSC(const S4 &mat, std::string data_type, std::string index_type) {
+  ~VCSC() { delete vcsc; }
 
-    // create the vectors
-    IntegerVector i, p, Dim;
-    NumericVector x;
-    List Dimnames;
-    bool columnMajor = true;
-
-    // get sparse matrix type
-    std::string mat_type = mat.attr("class");
-
-    if (mat_type == "dgCMatrix") {
-      i = mat.slot("i");
-      p = mat.slot("p");
-      x = mat.slot("x");
-      Dim = mat.slot("Dim");
-    } else if (mat_type == "dgRMatrix") {
-      i = mat.slot("j");
-      p = mat.slot("p");
-      x = mat.slot("x");
-      Dim = mat.slot("Dim");
-      columnMajor = false;
-    } else {
-      stop("Invalid matrix type");
-    }
-
-    uint64_t nrow = Dim[0];
-    uint64_t ncol = Dim[1];
-    uint64_t nnz = x.size();
-
-    // get pointers to the vectors
-    int *i_ptr = &i[0];
-    int *p_ptr = &p[0];
-    double *x_ptr = &x[0];
-
-    if (data_type == "int" && index_type == "int") {
-      DerivedVCSC<int, int> *derived_vcsc_mat = new DerivedVCSC<int, int>();
-      std::vector<int> x2(x.begin(), x.end());     // values
-      int *x2_ptr = &x2[0];
-      derived_vcsc_mat->mat = new IVSparse::VCSC<int, int>(x2_ptr, i_ptr, p_ptr, nrow, ncol, nnz);
-      vcsc_mat = derived_vcsc_mat;
-    } 
-
-    std::vector<uint64_t> double_indices;
-    std::vector<uint64_t> double_pointers;
-    uint64_t *i2_ptr;
-    uint64_t *p2_ptr;
-    int index_byte_size = 4;
-    if (index_type == "long" || index_type == "uint64_t") {
-      index_byte_size = 8;
-      double_indices = std::vector<uint64_t>(i.begin(), i.end());
-      double_pointers = std::vector<uint64_t>(p.begin(), p.end());
-      i2_ptr = &double_indices[0];
-      p2_ptr = &double_pointers[0];
-    }
-
-    if (data_type == "int") { // ----------------- int ----------------- //
-      
-      if (index_byte_size == 4) {
-        DerivedVCSC<int, int> *derived_vcsc_mat = new DerivedVCSC<int, int>();
-        std::vector<int> x2(x.begin(), x.end());     // values
-        int *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<int, int>(x2_ptr, i_ptr, p_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      } else {
-        DerivedVCSC<int, uint64_t> *derived_vcsc_mat = new DerivedVCSC<int, uint64_t>();
-        std::vector<int> x2(x.begin(), x.end());     // values
-        int *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<int, uint64_t>(x2_ptr, i2_ptr, p2_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      }
-
-    } else if (data_type == "double") { // ----------------- double ----------------- //
-      
-      if (index_byte_size == 4) {
-        DerivedVCSC<double, int> *derived_vcsc_mat = new DerivedVCSC<double, int>();
-        derived_vcsc_mat->mat = new IVSparse::VCSC<double, int>(x_ptr, i_ptr, p_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      } else {
-        DerivedVCSC<double, uint64_t> *derived_vcsc_mat = new DerivedVCSC<double, uint64_t>();
-        derived_vcsc_mat->mat = new IVSparse::VCSC<double, uint64_t>(x_ptr, i2_ptr, p2_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      }
-
-    } else if (data_type == "float") { // ----------------- float ----------------- //
-      
-      if (index_byte_size == 4) {
-        DerivedVCSC<float, int> *derived_vcsc_mat = new DerivedVCSC<float, int>();
-        std::vector<float> x2(x.begin(), x.end());     // values
-        float *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<float, int>(x2_ptr, i_ptr, p_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      } else {
-        DerivedVCSC<float, uint64_t> *derived_vcsc_mat = new DerivedVCSC<float, uint64_t>();
-        std::vector<float> x2(x.begin(), x.end());     // values
-        float *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<float, uint64_t>(x2_ptr, i2_ptr, p2_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      }
-
-    } else if (data_type == "long") { //----------------- long ----------------- //
-      
-      if (index_byte_size == 4) {
-        DerivedVCSC<long, int> *derived_vcsc_mat = new DerivedVCSC<long, int>();
-        std::vector<long> x2(x.begin(), x.end());     // values
-        long *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<long, int>(x2_ptr, i_ptr, p_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      } else {
-        DerivedVCSC<long, uint64_t> *derived_vcsc_mat = new DerivedVCSC<long, uint64_t>();
-        std::vector<long> x2(x.begin(), x.end());     // values
-        long *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<long, uint64_t>(x2_ptr, i2_ptr, p2_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      }
-
-    } else if (data_type == "short") { //----------------- short ----------------- //
-      
-      if (index_byte_size == 4) {
-        DerivedVCSC<short, int> *derived_vcsc_mat = new DerivedVCSC<short, int>();
-        std::vector<short> x2(x.begin(), x.end());     // values
-        short *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<short, int>(x2_ptr, i_ptr, p_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      } else {
-        DerivedVCSC<short, uint64_t> *derived_vcsc_mat = new DerivedVCSC<short, uint64_t>();
-        std::vector<short> x2(x.begin(), x.end());     // values
-        short *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<short, uint64_t>(x2_ptr, i2_ptr, p2_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      }
-
-    } else if (data_type == "uint8_t") { //----------------- uint8_t ----------------- //
-      
-      if (index_byte_size == 4) {
-        DerivedVCSC<uint8_t, int> *derived_vcsc_mat = new DerivedVCSC<uint8_t, int>();
-        std::vector<uint8_t> x2(x.begin(), x.end());     // values
-        uint8_t *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<uint8_t, int>(x2_ptr, i_ptr, p_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      } else {
-        DerivedVCSC<uint8_t, uint64_t> *derived_vcsc_mat = new DerivedVCSC<uint8_t, uint64_t>();
-        std::vector<uint8_t> x2(x.begin(), x.end());     // values
-        uint8_t *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<uint8_t, uint64_t>(x2_ptr, i2_ptr, p2_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      }
-
-    } else if (data_type == "uint16_t") { //----------------- uint16_t ----------------- //
-      
-      if (index_byte_size == 4) {
-        DerivedVCSC<uint16_t, int> *derived_vcsc_mat = new DerivedVCSC<uint16_t, int>();
-        std::vector<uint16_t> x2(x.begin(), x.end());     // values
-        uint16_t *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<uint16_t, int>(x2_ptr, i_ptr, p_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      } else {
-        DerivedVCSC<uint16_t, uint64_t> *derived_vcsc_mat = new DerivedVCSC<uint16_t, uint64_t>();
-        std::vector<uint16_t> x2(x.begin(), x.end());     // values
-        uint16_t *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<uint16_t, uint64_t>(x2_ptr, i2_ptr, p2_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      }
-
-    } else if (data_type == "uint16_t") { //----------------- uint16_t ----------------- //
-      
-      if (index_byte_size == 4) {
-        DerivedVCSC<uint16_t, int> *derived_vcsc_mat = new DerivedVCSC<uint16_t, int>();
-        std::vector<uint16_t> x2(x.begin(), x.end());     // values
-        uint16_t *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<uint16_t, int>(x2_ptr, i_ptr, p_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      } else {
-        DerivedVCSC<uint16_t, uint64_t> *derived_vcsc_mat = new DerivedVCSC<uint16_t, uint64_t>();
-        std::vector<uint16_t> x2(x.begin(), x.end());     // values
-        uint16_t *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<uint16_t, uint64_t>(x2_ptr, i2_ptr, p2_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      }
-
-    } else if (data_type == "uint32_t") { //----------------- uint32_t ----------------- //
-      
-      if (index_byte_size == 4) {
-        DerivedVCSC<uint32_t, int> *derived_vcsc_mat = new DerivedVCSC<uint32_t, int>();
-        std::vector<uint32_t> x2(x.begin(), x.end());     // values
-        uint32_t *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<uint32_t, int>(x2_ptr, i_ptr, p_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      } else {
-        DerivedVCSC<uint32_t, uint64_t> *derived_vcsc_mat = new DerivedVCSC<uint32_t, uint64_t>();
-        std::vector<uint32_t> x2(x.begin(), x.end());     // values
-        uint32_t *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<uint32_t, uint64_t>(x2_ptr, i2_ptr, p2_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      }
-
-    } else if (data_type == "uint64_t") { //----------------- uint64_t ----------------- //
-      
-      if (index_byte_size == 4) {
-        DerivedVCSC<uint64_t, int> *derived_vcsc_mat = new DerivedVCSC<uint64_t, int>();
-        std::vector<uint64_t> x2(x.begin(), x.end());     // values
-        uint64_t *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<uint64_t, int>(x2_ptr, i_ptr, p_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      } else {
-        DerivedVCSC<uint64_t, uint64_t> *derived_vcsc_mat = new DerivedVCSC<uint64_t, uint64_t>();
-        std::vector<uint64_t> x2(x.begin(), x.end());     // values
-        uint64_t *x2_ptr = &x2[0];
-        derived_vcsc_mat->mat = new IVSparse::VCSC<uint64_t, uint64_t>(x2_ptr, i2_ptr, p2_ptr, nrow, ncol, nnz);
-        vcsc_mat = derived_vcsc_mat;
-      }
-
-    } else {
-      
-      stop("Invalid data type");
-
-    }
+  // coeff
+  T coeff(const uint64_t i, const uint64_t j) {
+    return vcsc->coeff(i, j);
   }
 
-  // Constructor for file input
-  // VCSC(std::string filename) {}
+  // append another VCSC matrix through the R6 class
+  void append(const S4 &mat) {
+    
+  }
 
-  // Copy constructor
-  // VCSC(const VCSC &vcsc) {
-  //   vcsc_mat = vcsc.vcsc_mat;
-  // }
+  VCSC<T, U> slice(const uint64_t start, const uint64_t end) {
+    IVSparse::VCSC<T, U> vcsc_sliced = vcsc->slice(start, end);
+    return VCSC<T, U>(&vcsc_sliced);  
+  }
 
-  // IVCSC constructor
-  // VCSC(const IVCSC &ivcsc) {}
+  // scale the matrix by a scalar returning a new matrix
+  void scale(const T scalar) {
+    vcsc->operator*=(scalar);
+  }
 
-  //-------------------------------------------------//
-
-  // ------- Destructor ------- //
-  ~VCSC() { delete vcsc_mat; }
-
-  /****************************************************
-   *                                                   *
-   *                                                   *
-   *                   Converters                      *
-   *                                                   *
-   *                                                   *
-   *****************************************************/
-
-  // to dgCMatrix
-  // S4 to_dgCMatrix() {}
-
-  // // to dgRMatrix
-  // S4 to_dgRMatrix() {}
-
-  // // to dgTMatrix
-  // S4 to_dgTMatrix() {}
-
-  // to ivcsc
-  // IVCSC to_ivcsc() {}
-
-  /****************************************************
-   *                                                   *
-   *                                                   *
-   *                      Getters                      *
-   *                                                   *
-   *                                                   *
-   *****************************************************/
-
-  // get the value at position (i, j)
-  double coeff(int i, int j) { return vcsc_mat->coeff(i, j); }
-
-  // rows
-  int rows() { return vcsc_mat->rows(); }
-
-  // cols
-  int cols() { return vcsc_mat->cols(); }
-
-  // nnz
-  int nnz() { return vcsc_mat->nnz(); }
-
-  // innerdim
-  int innerdim() { return vcsc_mat->innerdim(); }
-
-  // outerdim
-  int outerdim() { return vcsc_mat->outerdim(); }
-
-  // bytesize
-  int bytesize() { return vcsc_mat->bytesize(); }
-
-  /****************************************************
-   *                                                   *
-   *                                                   *
-   *               Matrix Manipulation                 *
-   *                                                   *
-   *                                                   *
-   *****************************************************/
-
-  // in place transpose
-  void transpose() { vcsc_mat->transpose();}
-
-  // // slice
-  // VCSC slice(int start, int end) {}
-
-  // append
-  void append(VCSC &other) { vcsc_mat->append(other); } 
-
-  // matrix multiplication
-  NumericMatrix mult(NumericMatrix dense_mat) { return vcsc_mat->mult(dense_mat); }
-
-  /*****************************************************
-   *                                                   *
-   *                                                   *
-   *                     Operators                     *
-   *                                                   *
-   *                                                   *
-   *****************************************************/
-
-  // scale
-  // VCSC operator*(double scalar) { return vcsc_mat->operator*(scalar); }
-
-  // // spmm
-  // VCSC operator*(NumericMatrix dense_mat) {}
-
-  // equality
-  // bool operator==(VCSC &vcsc) {
-  //   return vcsc_mat->operator==(*vcsc.vcsc_mat);
-  // }
-
-  // // inequality
-  // bool operator!=(VCSC &vcsc) {
-  //   return vcsc_mat->operator!=(*vcsc.vcsc_mat);
-  // }
-
-  // // assignment
-  // VCSC operator=(VCSC vcsc) {}
-
-  /*****************************************************
-   *                                                   *
-   *                                                   *
-   *                       Misc                        *
-   *                                                   *
-   *                                                   *
-   *****************************************************/
-
-  // print
   void print() {
-    if (vcsc_mat->rows() < 100 && vcsc_mat->cols() < 100) {
-      for (int i = 0; i < vcsc_mat->rows(); i++) {
-        for (int j = 0; j < vcsc_mat->cols(); j++) {
-          Rprintf("%f ", vcsc_mat->coeff(i, j));
-        }
-        Rprintf("\n");
-      }
-    } else {
-      // print summary and first 10 rows and columns
-      Rprintf("Rows: %d, Cols: %d, NNZ: %d\n", vcsc_mat->rows(), vcsc_mat->cols(), vcsc_mat->nnz());
+    // if more than 100 cols or rows print summary and first 10 rows and cols
+    if (vcsc->rows() > 100 || vcsc->cols() > 100) {
+      Rcout << "VCSC matrix with " << vcsc->rows() << " rows and " << vcsc->cols() << " columns" << std::endl;
+      Rcout << "First 10 rows and columns:" << std::endl;
       for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 10; j++) {
-          Rprintf("%f ", vcsc_mat->coeff(i, j));
+          Rcout << vcsc->coeff(i, j) << " ";
         }
-        Rprintf("\n");
+        Rcout << std::endl;
+      }
+    } else {
+      Rcout << "VCSC matrix with " << vcsc->rows() << " rows and " << vcsc->cols() << " columns" << std::endl;
+      for (int i = 0; i < vcsc->rows(); i++) {
+        for (int j = 0; j < vcsc->cols(); j++) {
+          Rcout << vcsc->coeff(i, j) << " ";
+        }
+        Rcout << std::endl;
       }
     }
   }
-
-  // // save
-  // void save(std::string filename) {}
-
-  // // load
-  // VCSC load(std::string filename) {}
-
-  //------------------------------------------------------
 
 };
 
-
-
-// DerivedVCSC methods that have circular dependencies
-template <typename T, typename U, bool columnMajor>
-void DerivedVCSC<T, U, columnMajor>::append(VCSC& other) {
-  IVSparse::VCSC<T, U, columnMajor> *other_mat;
-  // other_mat = other.vcsc_mat->mat;
-  
-  // get number of columns of other
-  int other_cols = other.cols();
-  
-  //print number of added columns
-  Rprintf("Adding %d columns\n", other_cols);
 }
 
+typedef RIVSparse::VCSC<int, int> VCSC_INT_INT;
+typedef RIVSparse::VCSC<int, uint64_t> VCSC_INT_UINT64;
+typedef RIVSparse::VCSC<double, int> VCSC_DOUBLE_INT;
+typedef RIVSparse::VCSC<double, uint64_t> VCSC_DOUBLE_UINT64;
 
+RCPP_MODULE(vcsc_int_int) {
+  class_<VCSC_INT_INT>("VCSC_INT_INT")
+  .constructor()
+  .constructor<S4>()
+  .method("coeff", &VCSC_INT_INT::coeff)
+  .method("append", &VCSC_INT_INT::append)
+  .method("scale", &VCSC_INT_INT::scale)
+  .method("print", &VCSC_INT_INT::print)
+  .method("slice", &VCSC_INT_INT::slice)
+  ;
+}
 
+RCPP_MODULE(vcsc_int_uint64) {
+  class_<VCSC_INT_UINT64>("VCSC_INT_UINT64")
+  .constructor()
+  .constructor<S4>()
+  .method("coeff", &VCSC_INT_UINT64::coeff)
+  .method("append", &VCSC_INT_UINT64::append)
+  .method("scale", &VCSC_INT_UINT64::scale)
+  .method("print", &VCSC_INT_UINT64::print)
+  .method("slice", &VCSC_INT_UINT64::slice)
+  ;
+}
 
-// Expose the VCSC class
-RCPP_MODULE(vcsc) {
-  class_<VCSC>("VCSC")
-    .constructor()
-    .constructor<S4>()
-    .constructor<S4, std::string, std::string>()
-    // .constructor<std::string>()
-    // .constructor<VCSC>()
-    // // .constructor<IVCSC>()
-    // // Add methods here
-    // converter methods
-    // .method("to_dgCMatrix", &VCSC::to_dgCMatrix)
-    // .method("to_dgRMatrix", &VCSC::to_dgRMatrix)
-    // .method("to_dgTMatrix", &VCSC::to_dgTMatrix)
-    // getters
-    .method("coeff", &VCSC::coeff)
-    .method("rows", &VCSC::rows)
-    .method("cols", &VCSC::cols)
-    .method("nnz", &VCSC::nnz)
-    .method("innerdim", &VCSC::innerdim)
-    .method("outerdim", &VCSC::outerdim)
-    .method("bytesize", &VCSC::bytesize)
-    // matrix manipulation
-    .method("transpose", &VCSC::transpose)
-    // .method("slice", &VCSC::slice)
-    .method("append", &VCSC::append)
-    .method("mult", &VCSC::mult)
-    // operators
-    // .method("operator*", &VCSC::operator*)
-    // .method("operator*", &VCSC::operator*)
-    // .method("operator==", &VCSC::operator==)
-    // .method("operator!=", &VCSC::operator!=)
-    // .method("operator=", &VCSC::operator=)
-    // misc
-    .method("print", &VCSC::print)
-    // .method("save", &VCSC::save)
-    // .method("load", &VCSC::load)
-    ;
+RCPP_MODULE(vcsc_double_int) {
+  class_<VCSC_DOUBLE_INT>("VCSC_DOUBLE_INT")
+  .constructor()
+  .constructor<S4>()
+  .method("coeff", &VCSC_DOUBLE_INT::coeff)
+  .method("append", &VCSC_DOUBLE_INT::append)
+  .method("scale", &VCSC_DOUBLE_INT::scale)
+  .method("print", &VCSC_DOUBLE_INT::print)
+  .method("slice", &VCSC_DOUBLE_INT::slice)
+  ;
+}
+
+RCPP_MODULE(vcsc_double_uint64) {
+  class_<VCSC_DOUBLE_UINT64>("VCSC_DOUBLE_UINT64")
+  .constructor()
+  .constructor<S4>()
+  .method("coeff", &VCSC_DOUBLE_UINT64::coeff)
+  .method("append", &VCSC_DOUBLE_UINT64::append)
+  .method("scale", &VCSC_DOUBLE_UINT64::scale)
+  .method("print", &VCSC_DOUBLE_UINT64::print)
+  .method("slice", &VCSC_DOUBLE_UINT64::slice)
+  ;
 }
