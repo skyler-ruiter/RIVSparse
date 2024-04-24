@@ -106,16 +106,6 @@ class VCSC {
     return vcsc->coeff(i, j);
   }
 
-  // append another VCSC matrix through the R6 class
-  void append(const S4 &mat) {
-    
-  }
-
-  VCSC<T, U> slice(const uint64_t start, const uint64_t end) {
-    IVSparse::VCSC<T, U> vcsc_sliced = vcsc->slice(start, end);
-    return VCSC<T, U>(&vcsc_sliced);  
-  }
-
   // scale the matrix by a scalar returning a new matrix
   void scale(const T scalar) {
     vcsc->operator*=(scalar);
@@ -143,6 +133,12 @@ class VCSC {
     }
   }
 
+
+  //* ---------------------Test Methods--------------------- *//
+
+  // test method for template specializations
+  VCSC<T, U> test(); 
+
 };
 
 }
@@ -152,15 +148,37 @@ typedef RIVSparse::VCSC<int, uint64_t> VCSC_INT_UINT64;
 typedef RIVSparse::VCSC<double, int> VCSC_DOUBLE_INT;
 typedef RIVSparse::VCSC<double, uint64_t> VCSC_DOUBLE_UINT64;
 
+
+// template specializations for Rcpp
+
+template <>
+VCSC_INT_INT VCSC_INT_INT::test() {
+  return VCSC_INT_INT();
+}
+
+template <>
+VCSC_INT_UINT64 VCSC_INT_UINT64::test() {
+  return VCSC_INT_UINT64();
+}
+
+template <>
+VCSC_DOUBLE_INT VCSC_DOUBLE_INT::test() {
+  return VCSC_DOUBLE_INT();
+}
+
+template <>
+VCSC_DOUBLE_UINT64 VCSC_DOUBLE_UINT64::test() {
+  return VCSC_DOUBLE_UINT64();
+}
+
 RCPP_MODULE(vcsc_int_int) {
   class_<VCSC_INT_INT>("VCSC_INT_INT")
   .constructor()
   .constructor<S4>()
   .method("coeff", &VCSC_INT_INT::coeff)
-  .method("append", &VCSC_INT_INT::append)
   .method("scale", &VCSC_INT_INT::scale)
   .method("print", &VCSC_INT_INT::print)
-  .method("slice", &VCSC_INT_INT::slice)
+  .method("test", &VCSC_INT_INT::test)
   ;
 }
 
@@ -169,10 +187,9 @@ RCPP_MODULE(vcsc_int_uint64) {
   .constructor()
   .constructor<S4>()
   .method("coeff", &VCSC_INT_UINT64::coeff)
-  .method("append", &VCSC_INT_UINT64::append)
   .method("scale", &VCSC_INT_UINT64::scale)
   .method("print", &VCSC_INT_UINT64::print)
-  .method("slice", &VCSC_INT_UINT64::slice)
+  .method("test", &VCSC_INT_UINT64::test)
   ;
 }
 
@@ -181,10 +198,9 @@ RCPP_MODULE(vcsc_double_int) {
   .constructor()
   .constructor<S4>()
   .method("coeff", &VCSC_DOUBLE_INT::coeff)
-  .method("append", &VCSC_DOUBLE_INT::append)
   .method("scale", &VCSC_DOUBLE_INT::scale)
   .method("print", &VCSC_DOUBLE_INT::print)
-  .method("slice", &VCSC_DOUBLE_INT::slice)
+  .method("test", &VCSC_DOUBLE_INT::test)
   ;
 }
 
@@ -193,9 +209,8 @@ RCPP_MODULE(vcsc_double_uint64) {
   .constructor()
   .constructor<S4>()
   .method("coeff", &VCSC_DOUBLE_UINT64::coeff)
-  .method("append", &VCSC_DOUBLE_UINT64::append)
   .method("scale", &VCSC_DOUBLE_UINT64::scale)
   .method("print", &VCSC_DOUBLE_UINT64::print)
-  .method("slice", &VCSC_DOUBLE_UINT64::slice)
+  .method("test", &VCSC_DOUBLE_UINT64::test)
   ;
 }

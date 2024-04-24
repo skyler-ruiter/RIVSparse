@@ -47,6 +47,8 @@ print("hi")
 
 isS4(vcsc_A)
 
+print(vcsc_A)
+
 # append vcsc_A to vcsc2_A
 # vcsc2_A$append(vcsc_A)
 
