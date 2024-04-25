@@ -58,4 +58,3 @@
   -------------ADD THE ITERATOR----------------
   [-] VCSC::iterator // iterator for the matrix
   [-] VCSC::begin()   // get iterator to the beginning
-

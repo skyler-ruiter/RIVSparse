@@ -1,20 +1,18 @@
 #include "../inst/include/RIVSparse.h"
 
 using namespace Rcpp;
-
 namespace RIVSparse {
 
 template <typename T, typename U>
 class VCSC {
   public:
+
+  // Attributes
   IVSparse::VCSC<T, U> *vcsc;
   bool columnMajor = true;
 
+  // Methods and Constructors
   VCSC() {}
-
-  VCSC(IVSparse::VCSC<T, U> *vcsc) {
-    this->vcsc = vcsc;
-  }
 
   VCSC(const S4 &mat) {
     IntegerVector i, p, Dim;
@@ -134,13 +132,35 @@ class VCSC {
   }
 
 
+  // slice method returning a new VCSC object
+  VCSC<T, U> slice(const uint64_t start, const uint64_t end) {
+    return VCSC<T, U>(vcsc->slice(start, end));
+  }
+
   //* ---------------------Test Methods--------------------- *//
 
   // test method for template specializations
-  VCSC<T, U> test(); 
+
+  // test method for returning a vcsc object using an environment object
+  // Environment test(double scalar) {
+  //   // create a new environment
+  //   Environment package_env("package:RIVSparse");
+  //   Environment class_env = package_env["VCSC"];
+  //   Function new_vcsc = class_env["new"];
+
+  //   // create a new vcsc object
+  //   Environment vcsc_env = new_vcsc();
+  // }
+
+  //! --Successs-- !// taking in a vcsc object as argument!
+  void test2(Environment &vcsc) {
+    Rprintf("Printing from test2\n");
+    Function print = vcsc["print"];
+    print();
+  }
+
 
 };
-
 }
 
 typedef RIVSparse::VCSC<int, int> VCSC_INT_INT;
@@ -149,27 +169,31 @@ typedef RIVSparse::VCSC<double, int> VCSC_DOUBLE_INT;
 typedef RIVSparse::VCSC<double, uint64_t> VCSC_DOUBLE_UINT64;
 
 
-// template specializations for Rcpp
+// *template specializations for Rcpp
 
-template <>
-VCSC_INT_INT VCSC_INT_INT::test() {
-  return VCSC_INT_INT();
-}
+// template <>
+// VCSC_INT_INT VCSC_INT_INT::test() {
+//   return VCSC_INT_INT();
+// }
 
-template <>
-VCSC_INT_UINT64 VCSC_INT_UINT64::test() {
-  return VCSC_INT_UINT64();
-}
+// template <>
+// VCSC_INT_UINT64 VCSC_INT_UINT64::test() {
+//   return VCSC_INT_UINT64();
+// }
 
-template <>
-VCSC_DOUBLE_INT VCSC_DOUBLE_INT::test() {
-  return VCSC_DOUBLE_INT();
-}
+// template <>
+// VCSC_DOUBLE_INT VCSC_DOUBLE_INT::test() {
+//   return VCSC_DOUBLE_INT();
+// }
 
-template <>
-VCSC_DOUBLE_UINT64 VCSC_DOUBLE_UINT64::test() {
-  return VCSC_DOUBLE_UINT64();
-}
+// template <>
+// VCSC_DOUBLE_UINT64 VCSC_DOUBLE_UINT64::test() {
+//   return VCSC_DOUBLE_UINT64();
+// }
+
+
+
+
 
 RCPP_MODULE(vcsc_int_int) {
   class_<VCSC_INT_INT>("VCSC_INT_INT")
@@ -178,7 +202,8 @@ RCPP_MODULE(vcsc_int_int) {
   .method("coeff", &VCSC_INT_INT::coeff)
   .method("scale", &VCSC_INT_INT::scale)
   .method("print", &VCSC_INT_INT::print)
-  .method("test", &VCSC_INT_INT::test)
+  // .method("test", &VCSC_INT_INT::test)
+  .method("test2", &VCSC_INT_INT::test2)
   ;
 }
 
@@ -189,7 +214,8 @@ RCPP_MODULE(vcsc_int_uint64) {
   .method("coeff", &VCSC_INT_UINT64::coeff)
   .method("scale", &VCSC_INT_UINT64::scale)
   .method("print", &VCSC_INT_UINT64::print)
-  .method("test", &VCSC_INT_UINT64::test)
+  // .method("test", &VCSC_INT_UINT64::test)
+  .method("test2", &VCSC_INT_UINT64::test2)
   ;
 }
 
@@ -200,7 +226,8 @@ RCPP_MODULE(vcsc_double_int) {
   .method("coeff", &VCSC_DOUBLE_INT::coeff)
   .method("scale", &VCSC_DOUBLE_INT::scale)
   .method("print", &VCSC_DOUBLE_INT::print)
-  .method("test", &VCSC_DOUBLE_INT::test)
+  // .method("test", &VCSC_DOUBLE_INT::test)
+  .method("test2", &VCSC_DOUBLE_INT::test2)
   ;
 }
 
@@ -211,6 +238,7 @@ RCPP_MODULE(vcsc_double_uint64) {
   .method("coeff", &VCSC_DOUBLE_UINT64::coeff)
   .method("scale", &VCSC_DOUBLE_UINT64::scale)
   .method("print", &VCSC_DOUBLE_UINT64::print)
-  .method("test", &VCSC_DOUBLE_UINT64::test)
+  // .method("test", &VCSC_DOUBLE_UINT64::test)
+  .method("test2", &VCSC_DOUBLE_UINT64::test2)
   ;
 }

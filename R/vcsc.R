@@ -3,7 +3,23 @@ library(R6)
 VCSC <- R6::R6Class("VCSC",
   public = list(
     vcsc_instance = NULL,
+    value_type = NULL,
+    index_type = NULL,
     initialize = function(A, val_t = "double", idx_t = "int") {
+
+      self$value_type <- val_t
+      self$index_type <- idx_t
+
+      # if A is a VCSC object
+      if (inherits(A, "VCSC")) {
+        # check data types match
+        if (A$value_type != val_t || A$index_type != idx_t) {
+          stop("Data types do not match")
+        }
+        self$vcsc_instance <- A$vcsc_instance
+        return()
+      }
+
       if (val_t == "int" && idx_t == "int") {
         self$vcsc_instance <- new(VCSC_INT_INT, A)
       } else if (val_t == "double" && idx_t == "int") {
@@ -11,6 +27,7 @@ VCSC <- R6::R6Class("VCSC",
       } else {
         stop("Invalid type")
       }
+
     },
     coeff = function(i, j) {
       self$vcsc_instance$coeff(i, j)
@@ -24,9 +41,12 @@ VCSC <- R6::R6Class("VCSC",
     print = function() {
       self$vcsc_instance$print()
     },
-    slice = function(i, j) {
-      # get and return the slice
-      self$vcsc_instance$slice(i, j)
+    test2 = function(mat) {
+      print(mat$vcsc_instance)
+      self$vcsc_instance$test2(mat)
+    },
+    deepcopy = function() {
+      new(VCSC, self, self$value_type, self$index_type)
     }
   )
 )
