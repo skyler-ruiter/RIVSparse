@@ -17,6 +17,7 @@ VCSC <- R6::R6Class("VCSC",
           stop("Data types do not match")
         }
         self$vcsc_instance <- A$vcsc_instance
+        printf("Hi from VCSC copy constructor section\n")
         return()
       }
 
@@ -44,9 +45,6 @@ VCSC <- R6::R6Class("VCSC",
     test2 = function(mat) {
       print(mat$vcsc_instance)
       self$vcsc_instance$test2(mat)
-    },
-    deepcopy = function() {
-      new(VCSC, self, self$value_type, self$index_type)
     }
   )
 )

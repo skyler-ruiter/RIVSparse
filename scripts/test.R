@@ -58,3 +58,6 @@ vcsc_B <- VCSC$new(A)
 vcsc_A$test2(vcsc2_A)
 
 test <- VCSC$new(A2)
+
+
+test2 <- VCSC$new(test)
