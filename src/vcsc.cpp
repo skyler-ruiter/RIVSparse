@@ -39,6 +39,9 @@ class VCSC {
       x = mat.slot("x");
       Dim = mat.slot("Dim");
     } else {
+      // print mat_type
+      printf("Matrix type: %s\n", mat_type.c_str());
+
       stop("Invalid matrix type");
     }
 
@@ -94,7 +97,6 @@ class VCSC {
     }
 
     vcsc = new IVSparse::VCSC<T, U>(x_ptr_new, i_ptr_new, p_ptr_new, nrow, ncol, nnz);
-
   }
 
   ~VCSC() { delete vcsc; }
@@ -131,32 +133,52 @@ class VCSC {
     }
   }
 
+  void append(SEXP vcsc_mat) {
+    // get the vcsc object
+    XPtr<IVSparse::VCSC<T, U>> vcsc_xptr(vcsc_mat);
+    IVSparse::VCSC<T, U> *vcsc_obj = vcsc_xptr;
 
-  // slice method returning a new VCSC object
-  VCSC<T, U> slice(const uint64_t start, const uint64_t end) {
-    return VCSC<T, U>(vcsc->slice(start, end));
+    // append the vcsc object
+    vcsc->append(*vcsc_obj);
+  }
+
+  SEXP slice(uint64_t start, uint64_t end) {
+    // create a new XPtr object
+    XPtr<IVSparse::VCSC<T, U>> slice_vcsc_ptr(new IVSparse::VCSC<T, U>(vcsc->slice(start, end)), true);
+    return slice_vcsc_ptr;
   }
 
   //* ---------------------Test Methods--------------------- *//
 
-  // test method for template specializations
+  // make method to return underlying vcsc object as a smart pointer
+  SEXP get_vcsc_xptr() {
+    XPtr<IVSparse::VCSC<T, U>> vcsc_xptr(vcsc, true);
+    return vcsc_xptr;
+  }
 
-  // test method for returning a vcsc object using an environment object
-  // Environment test(double scalar) {
-  //   // create a new environment
-  //   Environment package_env("package:RIVSparse");
-  //   Environment class_env = package_env["VCSC"];
-  //   Function new_vcsc = class_env["new"];
-
-  //   // create a new vcsc object
-  //   Environment vcsc_env = new_vcsc();
-  // }
+  void set_vcsc_ptr(SEXP vcsc_obj) {
+    XPtr<IVSparse::VCSC<T, U>> vcsc_xptr(vcsc_obj);
+    vcsc = new IVSparse::VCSC<T, U>(*vcsc_xptr);
+  }
 
   //! --Successs-- !// taking in a vcsc object as argument!
   void test2(Environment &vcsc) {
     Rprintf("Printing from test2\n");
     Function print = vcsc["print"];
     print();
+  }
+
+  // test method that returns an R6 VCSC object
+  //! ends up as another shallow copy of the original object
+  Environment test_return(Environment &vcsc_env) {
+    // create a new environment
+    Environment package_env("package:RIVSparse");
+    Environment class_env = package_env["VCSC"];
+    Function new_vcsc = class_env["new"];
+
+    // create a new vcsc object providing the vcsc object as an argument
+    Environment new_vcsc_env = new_vcsc(vcsc_env);
+    return new_vcsc_env;
   }
 
 };
@@ -175,24 +197,6 @@ typedef RIVSparse::VCSC<double, uint64_t> VCSC_DOUBLE_UINT64;
 //   return VCSC_INT_INT();
 // }
 
-// template <>
-// VCSC_INT_UINT64 VCSC_INT_UINT64::test() {
-//   return VCSC_INT_UINT64();
-// }
-
-// template <>
-// VCSC_DOUBLE_INT VCSC_DOUBLE_INT::test() {
-//   return VCSC_DOUBLE_INT();
-// }
-
-// template <>
-// VCSC_DOUBLE_UINT64 VCSC_DOUBLE_UINT64::test() {
-//   return VCSC_DOUBLE_UINT64();
-// }
-
-
-
-
 
 RCPP_MODULE(vcsc_int_int) {
   class_<VCSC_INT_INT>("VCSC_INT_INT")
@@ -201,8 +205,12 @@ RCPP_MODULE(vcsc_int_int) {
   .method("coeff", &VCSC_INT_INT::coeff)
   .method("scale", &VCSC_INT_INT::scale)
   .method("print", &VCSC_INT_INT::print)
-  // .method("test", &VCSC_INT_INT::test)
-  .method("test2", &VCSC_INT_INT::test2)
+  .method("append", &VCSC_INT_INT::append)
+  .method("slice", &VCSC_INT_INT::slice)
+  .method("test2", &VCSC_INT_INT::test2) //! test method
+  .method("test_return", &VCSC_INT_INT::test_return) //! test method
+  .method("get_vcsc_xptr", &VCSC_INT_INT::get_vcsc_xptr)
+  .method("set_vcsc_ptr", &VCSC_INT_INT::set_vcsc_ptr)
   ;
 }
 
@@ -213,8 +221,12 @@ RCPP_MODULE(vcsc_int_uint64) {
   .method("coeff", &VCSC_INT_UINT64::coeff)
   .method("scale", &VCSC_INT_UINT64::scale)
   .method("print", &VCSC_INT_UINT64::print)
-  // .method("test", &VCSC_INT_UINT64::test)
-  .method("test2", &VCSC_INT_UINT64::test2)
+  .method("append", &VCSC_INT_UINT64::append)
+  .method("slice", &VCSC_INT_UINT64::slice)
+  .method("test2", &VCSC_INT_UINT64::test2) //! test method
+  .method("test_return", &VCSC_INT_UINT64::test_return) //! test method
+  .method("get_vcsc_xptr", &VCSC_INT_UINT64::get_vcsc_xptr)
+  .method("set_vcsc_ptr", &VCSC_INT_UINT64::set_vcsc_ptr)
   ;
 }
 
@@ -225,8 +237,12 @@ RCPP_MODULE(vcsc_double_int) {
   .method("coeff", &VCSC_DOUBLE_INT::coeff)
   .method("scale", &VCSC_DOUBLE_INT::scale)
   .method("print", &VCSC_DOUBLE_INT::print)
-  // .method("test", &VCSC_DOUBLE_INT::test)
-  .method("test2", &VCSC_DOUBLE_INT::test2)
+  .method("append", &VCSC_DOUBLE_INT::append)
+  .method("slice", &VCSC_DOUBLE_INT::slice)
+  .method("test2", &VCSC_DOUBLE_INT::test2) //! test method
+  .method("test_return", &VCSC_DOUBLE_INT::test_return) //! test method
+  .method("get_vcsc_xptr", &VCSC_DOUBLE_INT::get_vcsc_xptr)
+  .method("set_vcsc_ptr", &VCSC_DOUBLE_INT::set_vcsc_ptr)
   ;
 }
 
@@ -237,7 +253,11 @@ RCPP_MODULE(vcsc_double_uint64) {
   .method("coeff", &VCSC_DOUBLE_UINT64::coeff)
   .method("scale", &VCSC_DOUBLE_UINT64::scale)
   .method("print", &VCSC_DOUBLE_UINT64::print)
-  // .method("test", &VCSC_DOUBLE_UINT64::test)
-  .method("test2", &VCSC_DOUBLE_UINT64::test2)
+  .method("append", &VCSC_DOUBLE_UINT64::append)
+  .method("slice", &VCSC_DOUBLE_UINT64::slice)
+  .method("test2", &VCSC_DOUBLE_UINT64::test2) //! test method
+  .method("test_return", &VCSC_DOUBLE_UINT64::test_return) //! test method
+  .method("get_vcsc_xptr", &VCSC_DOUBLE_UINT64::get_vcsc_xptr)
+  .method("set_vcsc_ptr", &VCSC_DOUBLE_UINT64::set_vcsc_ptr)
   ;
 }
