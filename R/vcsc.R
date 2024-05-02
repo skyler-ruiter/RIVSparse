@@ -69,6 +69,66 @@ VCSC <- R6::R6Class("VCSC",
       self$vcsc_instance$coeff(i, j)
     },
 
+    # get number of rows
+    rows = function() {
+      return(self$vcsc_instance$rows())
+    },
+
+    # get number of columns
+    cols = function() {
+      return(self$vcsc_instance$cols())
+    },
+
+    # get inner dimension
+    innerDim = function() {
+      return(self$vcsc_instance$innerDim())
+    },
+
+    # get outer dimension
+    outerDim = function() {
+      return(self$vcsc_instance$outerDim())
+    },
+
+    # get nnz
+    nnz = function() {
+      return(self$vcsc_instance$nnz())
+    },
+
+    # get byte size
+    byteSize = function() {
+      return(self$vcsc_instance$byteSize())
+    },
+
+    # get major order
+    getColumnMajor = function() {
+      return(self$vcsc_instance$getColumnMajor())
+    },
+
+    # get the unique values for the column
+    getUniqueValues = function(j) {
+      return(self$vcsc_instance$getValues(j))
+    },
+
+    # get the counts for the column
+    getCounts = function(j) {
+      return(self$vcsc_instance$getCounts(j))
+    },
+
+    # get the indices for the column
+    getIndices = function(j) {
+      return(self$vcsc_instance$getIndices(j))
+    },
+
+    # get the number of unique values for the column
+    getNumUniqueVals = function(j) {
+      return(self$vcsc_instance$getNumUniqueVals(j))
+    },
+
+    # get num indices for the column
+    getNumIndices = function(j) {
+      return(self$vcsc_instance$getNumIndices(j))
+    },
+
     ###* Converters *###
 
     ###* Calculations *###

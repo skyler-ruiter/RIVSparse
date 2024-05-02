@@ -111,7 +111,6 @@ class VCSC {
   ~VCSC() { delete vcsc; }
 
   //* ---------------------Getters--------------------- *//
-  //TODO: getters for specific VCSC data (vals, counts, indices, etc.)
 
   // coeff
   T coeff(const uint64_t i, const uint64_t j) { return vcsc->coeff(i, j); }
@@ -136,6 +135,60 @@ class VCSC {
 
   // get the column major attribute
   bool getColumnMajor() { return vcsc->isColumnMajor(); }
+
+  // get unique values for a column
+  NumericVector getValues(uint64_t col) {
+    // get number of values in the column
+    uint64_t num_uniq_vals = vcsc->getNumUniqueVals(col);
+
+    // get the values
+    T *vals = vcsc->getValues(col);
+
+    // convert to NumericVector
+    NumericVector vals_vec(num_uniq_vals);
+    for (int i = 0; i < num_uniq_vals; i++) {
+      vals_vec[i] = vals[i];
+    }
+    return vals_vec;
+  }
+
+  // get the counts for each unique value for a column
+  NumericVector getCounts(uint64_t col) {
+    // get number of values in the column
+    uint64_t num_uniq_vals = vcsc->getNumUniqueVals(col);
+
+    // get the counts
+    U *counts = vcsc->getCounts(col);
+
+    // convert to NumericVector
+    NumericVector counts_vec(num_uniq_vals);
+    for (int i = 0; i < num_uniq_vals; i++) {
+      counts_vec[i] = counts[i];
+    }
+    return counts_vec;
+  }
+
+  // get the indices for each unique value for a column
+  NumericVector getIndices(uint64_t col) {
+    // get number of values in the column
+    uint64_t num_indices = vcsc->getNumIndices(col);
+
+    // get the indices
+    U *indices = vcsc->getIndices(col);
+
+    // convert to NumericVector
+    NumericVector indices_vec(num_indices);
+    for (int i = 0; i < num_indices; i++) {
+      indices_vec[i] = indices[i];
+    }
+    return indices_vec;
+  }
+
+  // get the number of unique values for a column
+  uint64_t getNumUniqueVals(uint64_t col) { return vcsc->getNumUniqueVals(col); }
+
+  // get the number of indices for a column
+  uint64_t getNumIndices(uint64_t col) { return vcsc->getNumIndices(col); }
 
   //* ---------------------Converters--------------------- *//
   //TODO: converters to dg(C|R|T)Matrix and IVCSC
@@ -254,6 +307,18 @@ RCPP_MODULE(vcsc_int_int) {
   .constructor<S4>()
   // getters
   .method("coeff", &VCSC_INT_INT::coeff)
+  .method("rows", &VCSC_INT_INT::rows)
+  .method("cols", &VCSC_INT_INT::cols)
+  .method("innerDim", &VCSC_INT_INT::innerDim)
+  .method("outerDim", &VCSC_INT_INT::outerDim)
+  .method("nnz", &VCSC_INT_INT::nnz)
+  .method("byteSize", &VCSC_INT_INT::byteSize)
+  .method("getColumnMajor", &VCSC_INT_INT::getColumnMajor)
+  .method("getValues", &VCSC_INT_INT::getValues)
+  .method("getCounts", &VCSC_INT_INT::getCounts)
+  .method("getIndices", &VCSC_INT_INT::getIndices)
+  .method("getNumUniqueVals", &VCSC_INT_INT::getNumUniqueVals)
+  .method("getNumIndices", &VCSC_INT_INT::getNumIndices)
   // converters
   // calculations
   // utility
@@ -278,6 +343,18 @@ RCPP_MODULE(vcsc_int_uint64) {
   .constructor<S4>()
   // getters
   .method("coeff", &VCSC_INT_UINT64::coeff)
+  .method("rows", &VCSC_INT_UINT64::rows)
+  .method("cols", &VCSC_INT_UINT64::cols)
+  .method("innerDim", &VCSC_INT_UINT64::innerDim)
+  .method("outerDim", &VCSC_INT_UINT64::outerDim)
+  .method("nnz", &VCSC_INT_UINT64::nnz)
+  .method("byteSize", &VCSC_INT_UINT64::byteSize)
+  .method("getColumnMajor", &VCSC_INT_UINT64::getColumnMajor)
+  .method("getValues", &VCSC_INT_UINT64::getValues)
+  .method("getCounts", &VCSC_INT_UINT64::getCounts)
+  .method("getIndices", &VCSC_INT_UINT64::getIndices)
+  .method("getNumUniqueVals", &VCSC_INT_UINT64::getNumUniqueVals)
+  .method("getNumIndices", &VCSC_INT_UINT64::getNumIndices)
   // converters
   // calculations
   // utility
@@ -302,6 +379,18 @@ RCPP_MODULE(vcsc_double_int) {
   .constructor<S4>()
   // getters
   .method("coeff", &VCSC_DOUBLE_INT::coeff)
+  .method("rows", &VCSC_DOUBLE_INT::rows)
+  .method("cols", &VCSC_DOUBLE_INT::cols)
+  .method("innerDim", &VCSC_DOUBLE_INT::innerDim)
+  .method("outerDim", &VCSC_DOUBLE_INT::outerDim)
+  .method("nnz", &VCSC_DOUBLE_INT::nnz)
+  .method("byteSize", &VCSC_DOUBLE_INT::byteSize)
+  .method("getColumnMajor", &VCSC_DOUBLE_INT::getColumnMajor)
+  .method("getValues", &VCSC_DOUBLE_INT::getValues)
+  .method("getCounts", &VCSC_DOUBLE_INT::getCounts)
+  .method("getIndices", &VCSC_DOUBLE_INT::getIndices)
+  .method("getNumUniqueVals", &VCSC_DOUBLE_INT::getNumUniqueVals)
+  .method("getNumIndices", &VCSC_DOUBLE_INT::getNumIndices)
   // converters
   // calculations
   // utility
@@ -326,6 +415,18 @@ RCPP_MODULE(vcsc_double_uint64) {
   .constructor<S4>()
   // getters
   .method("coeff", &VCSC_DOUBLE_UINT64::coeff)
+  .method("rows", &VCSC_DOUBLE_UINT64::rows)
+  .method("cols", &VCSC_DOUBLE_UINT64::cols)
+  .method("innerDim", &VCSC_DOUBLE_UINT64::innerDim)
+  .method("outerDim", &VCSC_DOUBLE_UINT64::outerDim)
+  .method("nnz", &VCSC_DOUBLE_UINT64::nnz)
+  .method("byteSize", &VCSC_DOUBLE_UINT64::byteSize)
+  .method("getColumnMajor", &VCSC_DOUBLE_UINT64::getColumnMajor)
+  .method("getValues", &VCSC_DOUBLE_UINT64::getValues)
+  .method("getCounts", &VCSC_DOUBLE_UINT64::getCounts)
+  .method("getIndices", &VCSC_DOUBLE_UINT64::getIndices)
+  .method("getNumUniqueVals", &VCSC_DOUBLE_UINT64::getNumUniqueVals)
+  .method("getNumIndices", &VCSC_DOUBLE_UINT64::getNumIndices)
   // converters
   // calculations
   // utility
