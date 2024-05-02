@@ -53,7 +53,7 @@ vcsc2_A <- VCSC$new(A2, "int", "int")
 # # print vcsc_A
 # vcsc_A$print()
 
-vcsc_A$test2(vcsc2_A)
+# vcsc_A$test2(vcsc2_A)
 
 # test <- VCSC$new(A2)
 
